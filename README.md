@@ -126,12 +126,3 @@ sudo chmod +x install.sh
 - 如您在使用本项目的过程中存在任何非法行为，您需自行承担相应后果，我们将不承担任何法律及连带责任。
 - 在使用本项目前，请您**务必审慎阅读、充分理解各条款内容**，限制、免责条款或者其他涉及您重大权益的条款可能会以加粗、加下划线等形式提示您重点注意。除非您已充分阅读、完全理解并接受本协议所有条款，否则，请您不要使用本项目。您的使用行为或者您以其他任何明示或者默示方式表示接受本协议的，即视为您已阅读并同意本协议的约束。
 
-## 贡献人员
-
-![commit](https://opencollective.com/Medusa/contributors.svg?width=890&button=false)
-
-## 时间轴
-
-![Alt](https://repobeats.axiom.co/api/embed/dde3107e3339aa21a9b244749737e8a39a650ab9.svg "Repobeats analytics image")
-
-![star](https://starchart.cc/Ascotbe/Medusa.svg)
