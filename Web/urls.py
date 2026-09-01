@@ -17,8 +17,8 @@ Including another URLconf
 """
 from django.urls import path,re_path
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-#from Web.BasicFunctions import VulnerabilityScanning,VulnerabilityQuery,GenerateReport,ProxyScan
-from Web.BasicFunctions import Registered,User,Home,VerificationCode,Information
+from Web.BasicFunctions import VulnerabilityScanning,VulnerabilityQuery,GenerateReport,ProxyScan
+from Web.BasicFunctions import Registered,User,Home,VerificationCode,Information,CsrfToken
 from Web.CrossSiteScriptHub import CrossSiteScript,TemplateManagement
 from Web.SystemInfo import HardwareInfo
 from Web.CVE.GithubMonitoring import Github
@@ -44,20 +44,27 @@ urlpatterns = [
     path('api/upload_avatar/', User.UploadAvatar),  # 上传头像接口
     # 验证码相关
     path('api/get_verification_code/', VerificationCode.GenerateVerificationCode),  # 获取验证码api
+    # CSRF防护相关
+    path('api/get_csrf_token/', CsrfToken.GetCsrfToken),  # 获取CSRF令牌api
     # 首页相关
     path('api/homepage_default_data/', Home.HomepageDefaultData),  # 首页默认数据
     path('api/homepage_vulnerability_distributiont_data/', Home.HomepageVulnerabilityDistributiontData),  # 首页漏洞分布数据
     path('api/homepage_github_monitor_data/', Home.HomepageGithubMonitorData),  # 首页github监控数据
     # 主动扫描相关
-    # path('api/vulnerability_scanning/', VulnerabilityScanning.Scan),#扫描
-    # path('api/active_scan_list_query/', VulnerabilityQuery.ActiveScanListQuery),#主动扫描列表查询
-    # path('api/scan_information_query/', VulnerabilityQuery.ScanInformationQuery),  #主动扫描关系表
-    # path('api/medusa_query/', VulnerabilityQuery.MedusaValueQuery),  # 美杜莎单个漏洞查询
-    # path('api/generate_word/', GenerateReport.GenerateWord),  # 美杜莎报告生成接口
-    # path('api/download_word/', GenerateReport.DownloadWord),  # 美杜莎报告下载接口
-    # path('api/actively_scan_port_information/', VulnerabilityQuery.ActivelyScanPortInformation),  # 主动扫描中端口信息查询模块
+    path('api/vulnerability_scanning/', VulnerabilityScanning.Scan),  # 扫描
+    path('api/active_scan_list_query/', VulnerabilityQuery.ActiveScanListQuery),  # 主动扫描列表查询
+    path('api/scan_information_query/', VulnerabilityQuery.ScanInformationQuery),  # 主动扫描关系表
+    path('api/medusa_query/', VulnerabilityQuery.MedusaValueQuery),  # 美杜莎单个漏洞查询
+    path('api/generate_word/', GenerateReport.GenerateWord),  # 美杜莎报告生成接口
+    path('api/download_word/', GenerateReport.DownloadWord),  # 美杜莎报告下载接口
+    path('api/actively_scan_port_information/', VulnerabilityQuery.ActivelyScanPortInformation),  # 主动扫描中端口信息查询模块
+    path('api/subdomain_query/', VulnerabilityQuery.SubdomainQuery),  # 子域名探测结果查询
     # 被动扫描相关
-    # path('api/create_proxy_scan_project/', ProxyScan.CreateProxyScanProject),  # 创建代理扫描项目
+    path('api/create_proxy_scan_project/', ProxyScan.CreateProxyScanProject),  # 创建代理扫描项目
+    path('api/query_proxy_scan_project/', ProxyScan.QueryProxyScanProject),  # 查询当前用户的代理扫描项目列表
+    path('api/update_proxy_scan_project_status/', ProxyScan.UpdateProxyScanProjectStatus),  # 启停代理扫描项目
+    path('api/delete_proxy_scan_project/', ProxyScan.DeleteProxyScanProject),  # 删除代理扫描项目
+    path('api/query_proxy_scan_data/', ProxyScan.QueryProxyScanData),  # 查询代理抓取的原始流量数据
     # 监控相关
     path('api/system_hardware_usage_query/', HardwareInfo.UsageQuery),  # 获取当前机器cpu和内存使用情况
     path('api/system_hardware_initialization/', HardwareInfo.Initialization),  # 获取当前机器基础信息

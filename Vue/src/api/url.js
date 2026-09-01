@@ -114,7 +114,7 @@ export const URL_POST_MEDUSA_INFO = `/medusa_info/`//关于
 
 export const URL_POST_SCANNING = `/vulnerability_scanning/` // 扫描任务下发接口
 export const URL_POST_LIST_QUERY = `/active_scan_list_query/` // 主动扫描目标列表查询接口
-export const URL_POST_PORT_INFORMATION = `actively_scan_port_information/`//主动扫描端口查询
+export const URL_POST_PORT_INFORMATION = `/actively_scan_port_information/`//主动扫描端口查询
 export const URL_POST_INFOMATION_QUERY = `/scan_information_query/` // 主动扫描目标漏洞列表查询接口
 export const URL_POST_MEDUSA_QUERY = `/medusa_query/` //主动扫描目标单个漏洞详细内容查询接口
 export const URL_POST_GENERATE_WORD = `/generate_word/` // 扫描报告生成接口
