@@ -18,16 +18,34 @@ from config import redis_host,redis_password,redis_port,redis_db
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def EnvBool(name: str, default: bool) -> bool:  # 读取布尔类型的环境变量
+    value = os.environ.get(name)
+    if value is None or value.strip() == "":
+        return default
+    return value.strip().lower() in ("1", "true", "yes", "on")
+
+
+def EnvList(name: str, default: list) -> list:  # 读取逗号分隔列表类型的环境变量
+    value = os.environ.get(name)
+    if value is None or value.strip() == "":
+        return default
+    return [i.strip() for i in value.split(",") if i.strip()]
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'wme1h&*11s!m)5fb)yjo97zt=bx^s3^$bb*18-#a!00&=k9(4o'
+# 生产环境必须通过环境变量 MEDUSA_SECRET_KEY 注入，保留默认值仅为避免既有部署被中断
+SECRET_KEY = os.environ.get("MEDUSA_SECRET_KEY", 'wme1h&*11s!m)5fb)yjo97zt=bx^s3^$bb*18-#a!00&=k9(4o')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True #这边还是要设置为开启，不然没办法加载静态文件，而且开启也没关系，反正项目是开源的
+# 关闭 DEBUG 后 Django 不再托管静态文件，必须先执行 collectstatic 并由 Nginx 托管 /s/ 路径
+# 本地开发如需调试，设置环境变量 MEDUSA_DEBUG=True 即可重新开启
+DEBUG = EnvBool("MEDUSA_DEBUG", False)
 
-ALLOWED_HOSTS = ['*']
+# 生产环境建议通过 MEDUSA_ALLOWED_HOSTS 指定实际域名，多个域名用逗号分隔
+ALLOWED_HOSTS = EnvList("MEDUSA_ALLOWED_HOSTS", ['*'])
 
 
 
@@ -88,12 +106,13 @@ DATABASES = {
 }
 
 #跨域用的
+# 关闭全量放行，仅允许白名单内的前端域名；通过环境变量 MEDUSA_CORS_ORIGINS 配置，多个用逗号分隔
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = [
-    'http://*',
-    'https://*',
-]
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ORIGIN_WHITELIST = EnvList("MEDUSA_CORS_ORIGINS", [
+    'http://127.0.0.1:8080',
+    'http://localhost:8080',
+])
 
 CORS_ALLOW_METHODS = (
     'GET',
@@ -164,6 +183,8 @@ STATICFILES_DIRS=(
     os.path.join(BASE_DIR,'Web/Image'),#静态资源加载位置
     os.path.join(BASE_DIR,'Web/CrossSiteScriptHub/CrossSiteScriptProject'),#存放XSSjs文件目录
 )
+# 关闭 DEBUG 后由 collectstatic 汇总到该目录，再由 Nginx 直接托管 /s/ 路径，不再走 Django
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 #celery
