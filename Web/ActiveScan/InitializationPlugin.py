@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from ClassCongregation import Plugins,GetPath
+from ClassCongregation import Plugins, GetPath, ErrorLog
+from Web.ActiveScan.PluginEngine import PluginEngine
 import os
 
 def InitialVerification(TempFilePath):#验证是否初始化
@@ -15,6 +16,12 @@ def InitialVerification(TempFilePath):#验证是否初始化
 
 
 def Run():
+    """初始化插件库
+
+    先沿用原有逻辑把插件文件名登记到 Plugins 表，
+    再调用插件引擎做一次全量解析校验，把格式非法的插件写入错误日志，
+    避免坏插件在扫描阶段才暴露问题。
+    """
     TempFilePath = GetPath().TempFilePath()  # 获取TMP文件路径
     PluginsFilePath=GetPath().PluginsFilePath()#获取插件文件路径
     PluginsDB = Plugins()  # 初始化连接
@@ -31,8 +38,14 @@ def Run():
         PluginsDB.con.close()#关闭数据库连接
         open(TempFilePath + "InitializationPlugin.lock", 'w+').write("Super Invincible Cute Neiru Aonuma")  # 初始化后写入初始化锁
 
+    VerificationPlugin()  # 每次启动都做一次插件校验
 
 
-
-
-
+def VerificationPlugin() -> dict:
+    """校验全部插件，返回统计与错误信息"""
+    engine = PluginEngine()
+    plugins = engine.LoadAll()
+    if engine.errors:
+        for error in engine.errors:
+            ErrorLog().Write("插件校验失败 -> %s" % error)
+    return {"total": len(plugins), "errors": engine.errors}
