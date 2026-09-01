@@ -41,6 +41,7 @@ if [[ `uname` == 'Linux' ]]; then
     redis_password=`pwgen 26 -c 1 -n 5`
     secret_key_required_for_account_registration=`pwgen 40 -c 1 -n 5`
     forget_password_key=`pwgen 40 -c 1 -n 5`
+    secret_key=`pwgen 50 -c 1 -n 5`
 
     #当前medusa搭建域名
     sed -i "s/127.0.0.1:1234/$cross_site_script_uses_domain_names/g" manage.py
@@ -98,6 +99,8 @@ if [[ `uname` == 'Linux' ]]; then
     #redis密码
     sed -i "s/I_will_always_like_AyanamiRei/$redis_password/g" manage.py
     sed -i "s/redis_passwd123/$redis_password/g" Dockerfile
+    #Django密钥
+    sed -i "s/this_is_your_secret_key/$secret_key/g" Dockerfile
     #忘记密码key
     sed -i "s/I_will_always_like_KatsuragiMisato/$forget_password_key/g" manage.py
 
