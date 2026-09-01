@@ -119,6 +119,17 @@ export const URL_POST_INFOMATION_QUERY = `/scan_information_query/` // 主动扫
 export const URL_POST_MEDUSA_QUERY = `/medusa_query/` //主动扫描目标单个漏洞详细内容查询接口
 export const URL_POST_GENERATE_WORD = `/generate_word/` // 扫描报告生成接口
 export const URL_POST_DOWNLOAD_WORD = `/download_word/` // 扫描报告下载接口
+export const URL_POST_SUBDOMAIN_QUERY = `/subdomain_query/` // 子域名探测结果查询接口
+export const URL_GET_CSRF_TOKEN = `/get_csrf_token/` // 获取 CSRF 令牌
+
+
+
+//被动扫描
+export const URL_POST_CREATE_PROXY_SCAN_PROJECT = `/create_proxy_scan_project/` // 创建被动扫描项目
+export const URL_POST_QUERY_PROXY_SCAN_PROJECT = `/query_proxy_scan_project/` // 查询被动扫描项目列表
+export const URL_POST_UPDATE_PROXY_SCAN_PROJECT_STATUS = `/update_proxy_scan_project_status/` // 启停被动扫描项目
+export const URL_POST_DELETE_PROXY_SCAN_PROJECT = `/delete_proxy_scan_project/` // 删除被动扫描项目
+export const URL_POST_QUERY_PROXY_SCAN_DATA = `/query_proxy_scan_data/` // 查询被动扫描抓取流量数据
 
 
 

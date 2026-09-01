@@ -9,13 +9,24 @@ module.exports = {
     https: false,    //是否开启https
     hotOnly: false,
     proxy: { // 配置跨域
+      // 保留 /api 前缀与后端路由保持一致，同时让开发环境与前端同源，CSRF令牌Cookie才能正常携带
       '/api': {
         target: 'http://localhost:9999',
         ws: true,
         changOrigin: true,    //是否开启代理,在本地会创建一个虚拟服务端，然后发送请求的数据，并同时接收请求的数据，这样服务端和服务端进行数据的交互就不会有跨域问题
-        pathRewrite: {
-          '^/api': ''
-        }
+      },
+      // 静态资源与XSS/邮件回连同域代理
+      '/s': {
+        target: 'http://localhost:9999',
+        changOrigin: true,
+      },
+      '/a': {
+        target: 'http://localhost:9999',
+        changOrigin: true,
+      },
+      '/b': {
+        target: 'http://localhost:9999',
+        changOrigin: true,
       }
     },
     // before: app => { }

@@ -68,7 +68,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware',#这边是Csrf
+    'django.middleware.csrf.CsrfViewMiddleware',#Csrf防护，前端需在请求头 X-CSRFToken 中携带令牌
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -120,6 +120,18 @@ CORS_ALLOW_METHODS = (
     'POST',
 
 )
+
+#CSRF防护相关配置
+# 前端与API同域部署（Nginx 反代 /api），Lax 策略即可正常携带 Cookie
+CSRF_COOKIE_NAME = 'medusax_csrftoken'
+# WSGI 会将请求头统一转为大写并把 '-' 替换为 '_'，故前端发送 X-CSRFToken 即可命中该键
+CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
+CSRF_COOKIE_HTTPONLY = False  # 必须为 False，前端需要读取该 Cookie 并回传至请求头
+CSRF_COOKIE_SAMESITE = os.environ.get("MEDUSA_CSRF_SAMESITE", "Lax")
+CSRF_COOKIE_SECURE = EnvBool("MEDUSA_CSRF_SECURE", False)  # 全站 HTTPS 时建议设为 True
+CSRF_USE_SESSIONS = False
+# 校验失败时返回JSON而非HTML页面，前端据此自动重新获取令牌并重试
+CSRF_FAILURE_VIEW = 'Web.BasicFunctions.CsrfToken.CsrfFailure'
 
 CORS_ALLOW_HEADERS = (
     'XMLHttpRequest',

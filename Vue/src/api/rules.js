@@ -50,6 +50,12 @@ import {
   URL_POST_MEDUSA_QUERY,
   URL_POST_GENERATE_WORD,
   URL_POST_DOWNLOAD_WORD,
+  URL_POST_SUBDOMAIN_QUERY,
+  URL_POST_CREATE_PROXY_SCAN_PROJECT,
+  URL_POST_QUERY_PROXY_SCAN_PROJECT,
+  URL_POST_UPDATE_PROXY_SCAN_PROJECT_STATUS,
+  URL_POST_DELETE_PROXY_SCAN_PROJECT,
+  URL_POST_QUERY_PROXY_SCAN_DATA,
 
   //XSS平台
   URL_POST_CREATE_SCRIPT_PROJECT,
@@ -650,6 +656,43 @@ const api = {
   },
   async download_word (params) {
     let response = await postDownload(URL_POST_DOWNLOAD_WORD, params, {
+      headers: {}
+    })
+    return response
+  },
+  async subdomain_query (params) {
+    let response = await post(URL_POST_SUBDOMAIN_QUERY, params, {
+      headers: {}
+    })
+    return response
+  },
+  //被动扫描
+  async create_proxy_scan_project (params) {
+    let response = await post(URL_POST_CREATE_PROXY_SCAN_PROJECT, params, {
+      headers: {}
+    })
+    return response
+  },
+  async query_proxy_scan_project (params) {
+    let response = await post(URL_POST_QUERY_PROXY_SCAN_PROJECT, params, {
+      headers: {}
+    })
+    return response
+  },
+  async update_proxy_scan_project_status (params) {
+    let response = await post(URL_POST_UPDATE_PROXY_SCAN_PROJECT_STATUS, params, {
+      headers: {}
+    })
+    return response
+  },
+  async delete_proxy_scan_project (params) {
+    let response = await post(URL_POST_DELETE_PROXY_SCAN_PROJECT, params, {
+      headers: {}
+    })
+    return response
+  },
+  async query_proxy_scan_data (params) {
+    let response = await post(URL_POST_QUERY_PROXY_SCAN_DATA, params, {
       headers: {}
     })
     return response

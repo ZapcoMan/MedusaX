@@ -5,42 +5,74 @@ import {
 } from 'ant-design-vue';
 import store from '@/store'
 
-// import Cookies from 'js-cookie'
-
-// const xsrfToken = Cookies.get('XSRF-TOKEN')
-
 const config = require('../../faceConfig')
 export const baseURL = config.basePath
 
+// CSRF 令牌缓存与请求锁，避免并发场景下重复拉取令牌
+let csrfToken = ''
+let csrfTokenPromise = null
+
+/**
+ * 从 Cookie 中读取指定名称的值
+ * 使用原生 document.cookie 解析，避免引入额外依赖
+ */
+function getCookie(name) {
+  const prefix = name + '='
+  const parts = document.cookie ? document.cookie.split(';') : []
+  for (let i = 0; i < parts.length; i++) {
+    const item = parts[i].trim()
+    if (item.indexOf(prefix) === 0) {
+      return decodeURIComponent(item.substring(prefix.length))
+    }
+  }
+  return ''
+}
 
 // create an axios instance
 const service = axios.create({
   baseURL,
   timeout: 10000, // request timeout
+  withCredentials: true, // 携带 Cookie，CSRF 校验依赖令牌 Cookie
+  xsrfCookieName: 'medusax_csrftoken',
+  xsrfHeaderName: 'X-CSRFToken',
 })
-console.log(service)
-// // request interceptor
+
+/**
+ * 拉取 CSRF 令牌，后端通过 Set-Cookie 下发令牌并在响应体中返回同一份令牌
+ * 使用请求锁保证并发调用时只发起一次真实请求
+ */
+function fetchCsrfToken() {
+  if (csrfTokenPromise) {
+    return csrfTokenPromise
+  }
+  csrfTokenPromise = service
+    .get('/get_csrf_token/')
+    .then(response => {
+      const token = response && response.data && response.data.message ? response.data.message : ''
+      csrfToken = token || getCookie('medusax_csrftoken')
+      return csrfToken
+    })
+    .catch(() => {
+      return ''
+    })
+    .then(token => {
+      csrfTokenPromise = null
+      return token
+    })
+  return csrfTokenPromise
+}
+
+// request interceptor
 service.interceptors.request.use(
   config => {
-
-    // console.log(store.state.storeToken)
-    // if(store.state.storeToken){
-    //   config.headers.common['Token'] = store.state.storeToken
-    // }
-    // console.log(config)
-    // console.log(store.state.storeToken)
-
-    // do something before request is sent
-    // if (xsrfToken) {
-    //   config.headers['X-XSRF-TOKEN'] = xsrfToken
-    //   // console.log(xsrfToken)
-    // }
-    // if (store.getters.token) {
-    //   // let each request carry token
-    //   // ['X-Token'] is a custom headers key
-    //   // please modify it according to the actual situation
-    //   config.headers['X-Token'] = getToken()
-    // }
+    // GET 等幂等请求无需 CSRF 校验，仅对写操作注入令牌
+    const method = (config.method || 'get').toLowerCase()
+    if (method !== 'get' && method !== 'head' && method !== 'options') {
+      const token = csrfToken || getCookie('medusax_csrftoken')
+      if (token) {
+        config.headers['X-CSRFToken'] = token
+      }
+    }
     return config
   },
   error => {
@@ -94,6 +126,27 @@ service.interceptors.response.use(
     // }
   },
   error => {
+    // CSRF 令牌过期或缺失时，自动重新拉取令牌并重试一次，避免用户操作被 403 中断
+    const response = error && error.response
+    const originalRequest = error && error.config
+    const data = response && response.data
+    const isCsrfError =
+      response &&
+      response.status === 403 &&
+      data &&
+      data.code === 403
+
+    if (isCsrfError && originalRequest && !originalRequest.__csrfRetry) {
+      originalRequest.__csrfRetry = true
+      csrfToken = '' // 丢弃失效令牌
+      return fetchCsrfToken().then(token => {
+        if (token) {
+          originalRequest.headers['X-CSRFToken'] = token
+        }
+        return service.request(originalRequest)
+      })
+    }
+
     console.log('err' + error) // for debug
     message.error(error.message)
 
@@ -192,4 +245,8 @@ export function postParams(url, params, config) {
   })
 }
 
+// 应用启动时预取一次 CSRF 令牌，确保首个写操作即可携带令牌
+fetchCsrfToken()
+
 export default service
+export { fetchCsrfToken }
