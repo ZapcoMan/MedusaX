@@ -87,6 +87,13 @@ const routes = [
         // component: SiteInforMation,
         component: () => import('@/views/ActiveScanning/SiteInforMation/SiteInforMation'),
       },
+      //被动扫描
+      {
+        path: 'passiveScanning',
+        name: 'passiveScanning',
+        // component: PassiveScanning,
+        component: () => import('@/views/ActiveScanning/PassiveScanning/PassiveScanning'),
+      },
       //监控页面
       {
         path: 'GitHubMonitor',

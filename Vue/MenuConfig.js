@@ -23,7 +23,7 @@ const MenuConfig = () => {
       key: "ActiveScanning",
       iconType: "icon-saomiao1",
       msg: "主动扫描",
-      show: false,
+      show: true,
       children: [
         {
           key: "issueTasks",
@@ -41,8 +41,14 @@ const MenuConfig = () => {
       key: "sub2",
       iconType: "icon-saomiao2",
       msg: "被动扫描",
-      show: false,
-      children: [],
+      show: true,
+      children: [
+        {
+          key: "passiveScanning",
+          msg: "项目列表",
+          show: true,
+        },
+      ],
     },
     {
       key: "Monitor",
