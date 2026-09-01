@@ -38,7 +38,7 @@
 | 层 | 技术 |
 | --- | --- |
 | 后端 | Python 3.7+、Django 3.0.5、Celery 5.2.7（异步任务）、Gunicorn、Redis（消息队列/缓存） |
-| 前端 | Vue 2.6 + Vue Router + Vuex + Ant Design Vue + ECharts |
+| 前端 | Vue 2.6 + Vue Router + Vuex + Ant Design Vue + ECharts（Node.js 12.x–14.x，推荐 14 LTS；Vue CLI 4.5） |
 | 内置服务 | HTTP 服务（`HTTPServer.py`，端口 9999）、DNS 服务（`DNSServer.py`，端口 8888，用于 DNSLog 回连验证）、被动扫描代理（`PassiveScanProxy.py`，基于 mitmproxy 的独立代理进程，用于被动流量抓取与检测） |
 | 数据库 | SQLite（`Medusa.db`）+ Redis |
 | 部署 | Docker（`Dockerfile`、`install.sh`）、Nginx 反向代理、Sendmail 自建邮件服务 |
@@ -90,7 +90,7 @@
 git clone https://github.com/Ascotbe/Medusa.git
 cd Medusa
 pip install -r Medusa.txt      # 后端依赖（Python 3.7+）
-cd Vue && npm install          # 前端依赖
+cd Vue && npm install          # 前端依赖（Node.js 12.x–14.x，推荐 14 LTS，对应 Vue CLI 4.5）
 ```
 
 后端配置见 `config.py`（标注 `必须修改` 的字段需填写），前端配置见 `Vue/faceConfig.js`，详细步骤见 `docs/Documentation/Installation.md`。
