@@ -7,6 +7,7 @@ import time
 import base64
 from Web.DatabaseHub import EmailReceiveData,UserInfo,EmailProject,EmailDetails
 from Web.Workbench.LogRelated import UserOperationLogRecord,RequestLogRecord
+from django.views.decorators.csrf import csrf_exempt
 import re
 """
 http://127.0.0.1:9999/b/eNVqsIHXAV/?key=7adfffee50ed9cb5a49e6e6bb07cd538
@@ -18,6 +19,7 @@ http://127.0.0.1:9999/b/eNVqsIHXAV/?key=7adfffee50ed9cb5a49e6e6bb07cd538&use=aaa
 }
 key=7adfffee50ed9cb5a49e6e6bb07cd538&use=aaaddddd&passs=dasdasd
 """
+@csrf_exempt  # 该接口由邮件接收者点击时触发，无法携带CSRF令牌
 def Monitor(request,data):#用于接收信息的监控
     RequestLogRecord(request, request_api="email")
     get_request_fragment=""#项目ID
