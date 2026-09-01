@@ -48,10 +48,11 @@ def InitialConfiguration():
         }
         fixed_data = {  # 禁止修改
             "version": "v1.0.181",  # 版本号
-            "redis_host": "localhost",  # 连接redis的地址，默认本地
-            "redis_port": "6379",  # redis连接端口，默认6379
-            "redis_db": "6",  # 连接的数据库，默认为6
-            "redis_password": "I_will_always_like_AyanamiRei",  # 连接redis的密码
+            "redis_host": os.environ.get("MEDUSA_REDIS_HOST", "localhost"),  # 连接redis的地址，默认本地
+            "redis_port": os.environ.get("MEDUSA_REDIS_PORT", "6379"),  # redis连接端口，默认6379
+            "redis_db": os.environ.get("MEDUSA_REDIS_DB", "6"),  # 连接的数据库，默认为6
+            # 连接redis的密码，Docker 部署时由 REDIS_PASSWORD 注入，需与 redis.conf 中设置的密码保持一致
+            "redis_password": os.environ.get("REDIS_PASSWORD", "I_will_always_like_AyanamiRei"),
             "server_ip": "192.168.1.1",  # 填写你服务器的IP值
             "local_mail_host": "smtp.ascotbe.com",  # 设本地的邮件服务器
             "local_mail_user": "ascotbe@ascotbe.com",  # 设本地的邮件用户名
