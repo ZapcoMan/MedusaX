@@ -446,71 +446,71 @@ class ActiveScanList:#用户主动扫描网站信息列表,写入父表中的SID
 
 #
 # #通过scan_info_id和uid来查询
-# class MedusaQuery:#单个漏洞的详细内容查询表，具体写入表在ClassCongregation文件中，该表是个查询数据表
-#     def __init__(self):
-#         self.con = sqlite3.connect(GetPath().DatabaseFile())
-#         # 获取所创建数据的游标
-#         self.cur = self.con.cursor()
-#     def Query(self, **kwargs)->None or list:
-#         try:
-#             ScanInfoId = kwargs.get("scan_info_id")
-#             Uid = kwargs.get("uid")
-#             self.cur.execute("select * from Medusa where uid =? and scan_info_id = ?", (Uid, ScanInfoId,))
-#             result_list = []  # 存放json的返回结果列表用
-#             for i in self.cur.fetchall():
-#                 JsonValues = {}
-#                 JsonValues["scan_info_id"] = i[0]
-#                 JsonValues["url"] = i[1]
-#                 JsonValues["name"] = i[2]
-#                 JsonValues["affects"] = i[3]
-#                 JsonValues["rank"] = i[4]
-#                 JsonValues["suggest"] = i[5]
-#                 JsonValues["desc_content"] = i[6]
-#                 JsonValues["details"] = i[7]
-#                 JsonValues["number"] = i[8]
-#                 JsonValues["author"] = i[9]
-#                 JsonValues["create_date"] = i[10]
-#                 JsonValues["disclosure"] = i[11]
-#                 JsonValues["algroup"] = i[12]
-#                 JsonValues["version"] = i[13]
-#                 JsonValues["timestamp"] = i[14]
-#                 #JsonValues["active_scan_id"] = i[15]
-#                 JsonValues["response_headers"] = i[17]
-#                 JsonValues["response_text"] = i[18]
-#                 JsonValues["response_byte"] = i[19]
-#                 JsonValues["response_status_code"] = i[20]
-#                 JsonValues["request_path_url"] = i[21]
-#                 JsonValues["request_body"] = i[22]
-#                 JsonValues["request_method"] = i[23]
-#                 JsonValues["request_headers"] = i[24]
-#                 result_list.append(JsonValues)
-#             self.con.close()
-#             return result_list
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#             return None
-#     def QueryBySid(self, **kwargs):#生成word文档数据查询
-#         try:
-#             ActiveScanId = kwargs.get("active_scan_id")
-#             Uid = kwargs.get("uid")
-#             self.cur.execute("select * from Medusa where uid =? and active_scan_id = ?", (Uid, ActiveScanId,))
-#             result_list = []  # 存放json的返回结果列表用
-#             url=""
-#             for i in self.cur.fetchall():
-#                 JsonValues = {}
-#                 url= i[1]
-#                 JsonValues["vulnerability_name"] = i[2]
-#                 JsonValues["vulnerability_level"] = i[4]
-#                 JsonValues["repair_suggestions"] = i[5]
-#                 JsonValues["vulnerability_description"] = i[6]
-#                 JsonValues["vulnerability_details"] = i[7]
-#                 JsonValues["find_the_time"] = i[14]
-#                 result_list.append(JsonValues)
-#             self.con.close()
-#             return result_list,url
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#             return None
+class MedusaQuery:#单个漏洞的详细内容查询表，具体写入表在ClassCongregation文件中，该表是个查询数据表
+    def __init__(self):
+        self.con = sqlite3.connect(GetPath().DatabaseFile())
+        # 获取所创建数据的游标
+        self.cur = self.con.cursor()
+    def Query(self, **kwargs)->None or list:
+        try:
+            ScanInfoId = kwargs.get("scan_info_id")
+            Uid = kwargs.get("uid")
+            self.cur.execute("select * from Medusa where uid =? and scan_info_id = ?", (Uid, ScanInfoId,))
+            result_list = []  # 存放json的返回结果列表用
+            for i in self.cur.fetchall():
+                JsonValues = {}
+                JsonValues["scan_info_id"] = i[0]
+                JsonValues["url"] = i[1]
+                JsonValues["name"] = i[2]
+                JsonValues["affects"] = i[3]
+                JsonValues["rank"] = i[4]
+                JsonValues["suggest"] = i[5]
+                JsonValues["desc_content"] = i[6]
+                JsonValues["details"] = i[7]
+                JsonValues["number"] = i[8]
+                JsonValues["author"] = i[9]
+                JsonValues["create_date"] = i[10]
+                JsonValues["disclosure"] = i[11]
+                JsonValues["algroup"] = i[12]
+                JsonValues["version"] = i[13]
+                JsonValues["timestamp"] = i[14]
+                #JsonValues["active_scan_id"] = i[15]
+                JsonValues["response_headers"] = i[17]
+                JsonValues["response_text"] = i[18]
+                JsonValues["response_byte"] = i[19]
+                JsonValues["response_status_code"] = i[20]
+                JsonValues["request_path_url"] = i[21]
+                JsonValues["request_body"] = i[22]
+                JsonValues["request_method"] = i[23]
+                JsonValues["request_headers"] = i[24]
+                result_list.append(JsonValues)
+            self.con.close()
+            return result_list
+        except Exception as e:
+            ErrorLog().Write(e)
+            return None
+    def QueryBySid(self, **kwargs):#生成word文档数据查询
+        try:
+            ActiveScanId = kwargs.get("active_scan_id")
+            Uid = kwargs.get("uid")
+            self.cur.execute("select * from Medusa where uid =? and active_scan_id = ?", (Uid, ActiveScanId,))
+            result_list = []  # 存放json的返回结果列表用
+            url=""
+            for i in self.cur.fetchall():
+                JsonValues = {}
+                url= i[1]
+                JsonValues["vulnerability_name"] = i[2]
+                JsonValues["vulnerability_level"] = i[4]
+                JsonValues["repair_suggestions"] = i[5]
+                JsonValues["vulnerability_description"] = i[6]
+                JsonValues["vulnerability_details"] = i[7]
+                JsonValues["find_the_time"] = i[14]
+                result_list.append(JsonValues)
+            self.con.close()
+            return result_list,url
+        except Exception as e:
+            ErrorLog().Write(e)
+            return None
 
 class RequestLog:#操作日志
     def __init__(self):
@@ -588,218 +588,283 @@ class UserOperationLog:#用户操作日志
             ErrorLog().Write(e)
             return None
 #
-# class ReportGenerationList:#报告生成相关表
-#     def __init__(self):
-#         self.con = sqlite3.connect(GetPath().DatabaseFile())
-#         # 获取所创建数据的游标
-#         self.cur = self.con.cursor()
-#         # 创建表
-#         try:
-#             self.cur.execute("CREATE TABLE ReportGenerationList\
-#                             (id INTEGER PRIMARY KEY,\
-#                             file_name TEXT NOT NULL,\
-#                             uid TEXT NOT NULL,\
-#                             creation_time TEXT NOT NULL,\
-#                             active_scan_id TEXT NOT NULL)")
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#
-#     def Write(self, **kwargs) -> bool or None:  # 写入相关信息
-#         CreationTime = str(int(time.time()))  # 创建时间
-#         Uid = kwargs.get("uid")
-#         FileName = kwargs.get("file_name")
-#         ActiveScanId = kwargs.get("active_scan_id")
-#         try:
-#             self.cur.execute("INSERT INTO ReportGenerationList(file_name,uid,creation_time,active_scan_id)\
-#             VALUES (?,?,?,?)",(FileName, Uid, CreationTime, ActiveScanId,))
-#             # 提交
-#             self.con.commit()
-#             self.con.close()
-#             return True
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#             return None
-#     def Query(self,**kwargs)->bool or None:#查询该文件是否是该用户所有
-#         Uid = kwargs.get("uid")
-#         FileName = kwargs.get("file_name")
-#         try:
-#             self.cur.execute("select * from ReportGenerationList where file_name =? and uid=?", (FileName,Uid,))
-#             if self.cur.fetchall():  # 判断是否有数据
-#                 self.con.close()
-#                 return True
-#             else:
-#                 return False
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#             return None
+class ReportGenerationList:#报告生成相关表
+    def __init__(self):
+        self.con = sqlite3.connect(GetPath().DatabaseFile())
+        # 获取所创建数据的游标
+        self.cur = self.con.cursor()
+        # 创建表
+        try:
+            self.cur.execute("CREATE TABLE ReportGenerationList\
+                            (id INTEGER PRIMARY KEY,\
+                            file_name TEXT NOT NULL,\
+                            uid TEXT NOT NULL,\
+                            creation_time TEXT NOT NULL,\
+                            active_scan_id TEXT NOT NULL)")
+        except Exception as e:
+            ErrorLog().Write(e)
+
+    def Write(self, **kwargs) -> bool or None:  # 写入相关信息
+        CreationTime = str(int(time.time()))  # 创建时间
+        Uid = kwargs.get("uid")
+        FileName = kwargs.get("file_name")
+        ActiveScanId = kwargs.get("active_scan_id")
+        try:
+            self.cur.execute("INSERT INTO ReportGenerationList(file_name,uid,creation_time,active_scan_id)\
+            VALUES (?,?,?,?)",(FileName, Uid, CreationTime, ActiveScanId,))
+            # 提交
+            self.con.commit()
+            self.con.close()
+            return True
+        except Exception as e:
+            ErrorLog().Write(e)
+            return None
+    def Query(self,**kwargs)->bool or None:#查询该文件是否是该用户所有
+        Uid = kwargs.get("uid")
+        FileName = kwargs.get("file_name")
+        try:
+            self.cur.execute("select * from ReportGenerationList where file_name =? and uid=?", (FileName,Uid,))
+            if self.cur.fetchall():  # 判断是否有数据
+                self.con.close()
+                return True
+            else:
+                return False
+        except Exception as e:
+            ErrorLog().Write(e)
+            return None
 
 #
-# class ProxyScanList:#代理列表，一个代理项目一条数据
-#     def __init__(self):
-#         self.con = sqlite3.connect(GetPath().DatabaseFile())
-#         # 获取所创建数据的游标
-#         self.cur = self.con.cursor()
-#         # 创建表
-#         try:
-#             self.cur.execute("CREATE TABLE ProxyScanList\
-#                                 (proxy_id TEXT NOT NULL,\
-#                                 uid TEXT NOT NULL,\
-#                                 creation_time TEXT NOT NULL,\
-#                                 end_time TEXT NOT NULL,\
-#                                 status TEXT NOT NULL,\
-#                                 proxy_password TEXT NOT NULL,\
-#                                 proxy_username TEXT NOT NULL,\
-#                                 proxy_project_name TEXT NOT NULL)")
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#
-#     def Write(self, **kwargs) -> bool or None:  # 写入相关信息
-#         CreationTime = str(int(time.time()))  # 创建时间
-#         Uid = kwargs.get("uid")
-#         EndTime= kwargs.get("end_time")
-#         Status= 1#kwargs.get("status")#1表示启动0表示关闭
-#         ProxyPassword= kwargs.get("proxy_password")
-#         ProxyUsername= kwargs.get("proxy_username")
-#         ProxyProjectName= kwargs.get("proxy_project_name")
-#
-#         try:
-#             self.cur.execute("select creation_time from ProxyScanList")
-#             ProxyId="P"+str(len(self.cur.fetchall())+1)#构建特殊的ProxyId
-#             self.cur.execute("INSERT INTO ProxyScanList(proxy_id,uid,creation_time,end_time,status,proxy_password,proxy_username,proxy_project_name)\
-#                 VALUES (?,?,?,?,?,?,?,?)", (ProxyId,Uid, CreationTime, EndTime,Status,ProxyPassword,ProxyUsername,ProxyProjectName,))
-#             # 提交
-#             self.con.commit()
-#             self.con.close()
-#             return True
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#             return None
-#
-#     def QueryProxyProjectName(self,**kwargs)->bool or None:#查询扫描项目是否冲突,一个项目不能存在相同的项目名和用户名
-#         Uid = kwargs.get("uid")
-#         ProxyProjectName = kwargs.get("proxy_project_name")
-#         ProxyUsername = kwargs.get("proxy_username")
-#         try:
-#             self.cur.execute("select * from ProxyScanList where proxy_project_name =? and uid=? and proxy_username=?", (ProxyProjectName,Uid,ProxyUsername))
-#             if self.cur.fetchall():  # 判断是否有数据
-#                 self.con.close()
-#                 return True
-#             else:
-#                 return False
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#             return None
-#     def ProxyAuthentication(self,**kwargs)->bool or None:#查询用来认证用户的账号和密码是否复核UID
-#         ProxyUsername = kwargs.get("proxy_username")
-#         ProxyPassword = kwargs.get("proxy_password")
-#         try:
-#             self.cur.execute("select * from ProxyScanList where proxy_username =? and proxy_password=?", (ProxyUsername,ProxyPassword,))
-#             for i in self.cur.fetchall():
-#                 JsonValues = {}
-#                 JsonValues["proxy_id"] = i[0]
-#                 JsonValues["uid"] = i[1]
-#                 return JsonValues
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#             return None
-#
-#     # def Query(self,**kwargs)->bool or None:#查询该文件是否是该用户所有
-#     #     Uid = kwargs.get("uid")
-#     #     FileName = kwargs.get("file_name")
-#     #     try:
-#     #         self.cur.execute("select * from ReportGenerationList where file_name =? and uid=?", (FileName,Uid,))
-#     #         if self.cur.fetchall():  # 判断是否有数据
-#     #             self.con.close()
-#     #             return True
-#     #         else:
-#     #             return False
-#     #     except Exception as e:
-#     #         ErrorLog().Write(e)
-#     #         return None
-#
+class ProxyScanList:#代理列表，一个代理项目一条数据
+    def __init__(self):
+        self.con = sqlite3.connect(GetPath().DatabaseFile())
+        # 获取所创建数据的游标
+        self.cur = self.con.cursor()
+        # 创建表
+        try:
+            self.cur.execute("CREATE TABLE ProxyScanList\
+                                (proxy_id TEXT NOT NULL,\
+                                uid TEXT NOT NULL,\
+                                creation_time TEXT NOT NULL,\
+                                end_time TEXT NOT NULL,\
+                                status TEXT NOT NULL,\
+                                proxy_password TEXT NOT NULL,\
+                                proxy_username TEXT NOT NULL,\
+                                proxy_project_name TEXT NOT NULL)")
+        except Exception as e:
+            ErrorLog().Write(e)
 
-# class OriginalProxyData:#从代理中获取数据包进行存储
-#     def __init__(self):
-#         self.con = sqlite3.connect(GetPath().DatabaseFile())
-#         # 获取所创建数据的游标
-#         self.cur = self.con.cursor()
-#         # 创建表
-#         try:
-#             self.cur.execute("CREATE TABLE OriginalProxyData\
-#                                 (original_proxy_id INTEGER PRIMARY KEY,\
-#                                 uid TEXT NOT NULL,\
-#                                 proxy_id TEXT NOT NULL,\
-#                                 creation_time TEXT NOT NULL,\
-#                                 url TEXT NOT NULL,\
-#                                 request_headers TEXT NOT NULL,\
-#                                 request_date TEXT NOT NULL,\
-#                                 request_method TEXT NOT NULL,\
-#                                 response_headers TEXT NOT NULL,\
-#                                 response_status_code TEXT NOT NULL,\
-#                                 response_date_bytes TEXT NOT NULL,\
-#                                 response_date_string TEXT NOT NULL,\
-#                                 issue_task_status TEXT NOT NULL,\
-#                                 redis_id TEXT NOT NULL)")
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#
-#     def Write(self, **kwargs) -> bool or None:  # 写入相关信息
-#         CreationTime = str(int(time.time()))  # 创建时间
-#         Uid = kwargs.get("uid")
-#         ProxyId = kwargs.get("proxy_id")
-#         Url= kwargs.get("url")
-#         RequestHeaders= kwargs.get("request_headers")
-#         RequestDate= kwargs.get("request_date")
-#         RequestMethod=kwargs.get("request_method")
-#         ResponseHeaders=kwargs.get("response_headers")
-#         ResponseStatusCode=kwargs.get("response_status_code")
-#         ResponseDateBytes=kwargs.get("response_date_bytes")
-#         ResponseDateString=kwargs.get("response_date_string")
-#         IssueTaskStatus= "0"#未扫描为0 已扫描为1
-#         RedisId=kwargs.get("redis_id")
-#
-#         try:
-#             self.cur.execute("INSERT INTO OriginalProxyData(uid,proxy_id,creation_time,url,request_headers,request_date,request_method,response_headers,response_status_code,response_date_bytes,response_date_string,issue_task_status,redis_id)\
-#                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", (Uid, ProxyId, CreationTime, Url,RequestHeaders,RequestDate,RequestMethod,ResponseHeaders,ResponseStatusCode,ResponseDateBytes,ResponseDateString,IssueTaskStatus,RedisId,))
-#             # 提交
-#             self.con.commit()
-#             self.con.close()
-#             return True
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#             return None
-#     def UpdateScanStatus(self, **kwargs) -> bool or None:#更新扫描状态
-#         Uid = kwargs.get("uid")
-#         RedisId = kwargs.get("redis_id")
-#         try:
-#             self.cur.execute("""UPDATE OriginalProxyData SET issue_task_status= ? WHERE uid = ? and redis_id = ? """,
-#                              ( "1",Uid, RedisId,))
-#             # 提交
-#             if self.cur.rowcount < 1:  # 用来判断是否更新成功
-#                 self.con.commit()
-#                 self.con.close()
-#                 return False
-#             else:
-#                 self.con.commit()
-#                 self.con.close()
-#                 return True
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#             return False
-#查询暂时无
-    # def Query(self, **kwargs) -> bool or None:
-    #     Uid = kwargs.get("uid")
-    #     FileName = kwargs.get("file_name")
-    #     try:
-    #         self.cur.execute("select * from ReportGenerationList where file_name =? and uid=?", (FileName, Uid,))
-    #         if self.cur.fetchall():  # 判断是否有数据
-    #             self.con.close()
-    #             return True
-    #         else:
-    #             return False
-    #     except Exception as e:
-    #         ErrorLog().Write(e)
-    #         return None
+    def Write(self, **kwargs) -> bool or None:  # 写入相关信息
+        CreationTime = str(int(time.time()))  # 创建时间
+        Uid = kwargs.get("uid")
+        EndTime= kwargs.get("end_time")
+        Status= 1#kwargs.get("status")#1表示启动0表示关闭
+        ProxyPassword= kwargs.get("proxy_password")
+        ProxyUsername= kwargs.get("proxy_username")
+        ProxyProjectName= kwargs.get("proxy_project_name")
+
+        try:
+            self.cur.execute("select creation_time from ProxyScanList")
+            ProxyId="P"+str(len(self.cur.fetchall())+1)#构建特殊的ProxyId
+            self.cur.execute("INSERT INTO ProxyScanList(proxy_id,uid,creation_time,end_time,status,proxy_password,proxy_username,proxy_project_name)\
+                VALUES (?,?,?,?,?,?,?,?)", (ProxyId,Uid, CreationTime, EndTime,Status,ProxyPassword,ProxyUsername,ProxyProjectName,))
+            # 提交
+            self.con.commit()
+            self.con.close()
+            return True
+        except Exception as e:
+            ErrorLog().Write(e)
+            return None
+
+    def QueryProxyProjectName(self,**kwargs)->bool or None:#查询扫描项目是否冲突,一个项目不能存在相同的项目名和用户名
+        Uid = kwargs.get("uid")
+        ProxyProjectName = kwargs.get("proxy_project_name")
+        ProxyUsername = kwargs.get("proxy_username")
+        try:
+            self.cur.execute("select * from ProxyScanList where proxy_project_name =? and uid=? and proxy_username=?", (ProxyProjectName,Uid,ProxyUsername))
+            if self.cur.fetchall():  # 判断是否有数据
+                self.con.close()
+                return True
+            else:
+                return False
+        except Exception as e:
+            ErrorLog().Write(e)
+            return None
+    def ProxyAuthentication(self,**kwargs)->bool or None:#查询用来认证用户的账号和密码是否复核UID
+        ProxyUsername = kwargs.get("proxy_username")
+        ProxyPassword = kwargs.get("proxy_password")
+        try:
+            self.cur.execute("select * from ProxyScanList where proxy_username =? and proxy_password=?", (ProxyUsername,ProxyPassword,))
+            for i in self.cur.fetchall():
+                JsonValues = {}
+                JsonValues["proxy_id"] = i[0]
+                JsonValues["uid"] = i[1]
+                return JsonValues
+        except Exception as e:
+            ErrorLog().Write(e)
+            return None
+
+    def Query(self, **kwargs) -> list or None:  # 查询当前用户的所有代理扫描项目
+        Uid = kwargs.get("uid")
+        try:
+            self.cur.execute("select * from ProxyScanList where uid =?", (Uid,))
+            result_list = []
+            for i in self.cur.fetchall():
+                JsonValues = {}
+                JsonValues["proxy_id"] = i[0]
+                JsonValues["creation_time"] = i[2]
+                JsonValues["end_time"] = i[3]
+                JsonValues["status"] = i[4]
+                JsonValues["proxy_username"] = i[6]
+                JsonValues["proxy_project_name"] = i[7]
+                result_list.append(JsonValues)
+            self.con.close()
+            return result_list
+        except Exception as e:
+            ErrorLog().Write(e)
+            return None
+
+    def UpdateStatus(self, **kwargs) -> bool:  # 启停代理扫描项目
+        Uid = kwargs.get("uid")
+        ProxyId = kwargs.get("proxy_id")
+        Status = kwargs.get("status")
+        try:
+            self.cur.execute("""UPDATE ProxyScanList SET status = ? WHERE uid = ? and proxy_id = ?""",
+                             (Status, Uid, ProxyId,))
+            self.con.commit()
+            self.con.close()
+            return True
+        except Exception as e:
+            ErrorLog().Write(e)
+            return False
+
+    def Delete(self, **kwargs) -> bool:  # 删除代理扫描项目
+        Uid = kwargs.get("uid")
+        ProxyId = kwargs.get("proxy_id")
+        try:
+            self.cur.execute("""DELETE FROM ProxyScanList WHERE uid = ? and proxy_id = ?""", (Uid, ProxyId,))
+            self.con.commit()
+            self.con.close()
+            return True
+        except Exception as e:
+            ErrorLog().Write(e)
+            return False
+
+class OriginalProxyData:#从代理中获取数据包进行存储
+    def __init__(self):
+        self.con = sqlite3.connect(GetPath().DatabaseFile())
+        # 获取所创建数据的游标
+        self.cur = self.con.cursor()
+        # 创建表
+        try:
+            self.cur.execute("CREATE TABLE OriginalProxyData\
+                                (original_proxy_id INTEGER PRIMARY KEY,\
+                                uid TEXT NOT NULL,\
+                                proxy_id TEXT NOT NULL,\
+                                creation_time TEXT NOT NULL,\
+                                url TEXT NOT NULL,\
+                                request_headers TEXT NOT NULL,\
+                                request_date TEXT NOT NULL,\
+                                request_method TEXT NOT NULL,\
+                                response_headers TEXT NOT NULL,\
+                                response_status_code TEXT NOT NULL,\
+                                response_date_bytes TEXT NOT NULL,\
+                                response_date_string TEXT NOT NULL,\
+                                issue_task_status TEXT NOT NULL,\
+                                redis_id TEXT NOT NULL)")
+        except Exception as e:
+            ErrorLog().Write(e)
+
+    def Write(self, **kwargs) -> bool or None:  # 写入相关信息
+        CreationTime = str(int(time.time()))  # 创建时间
+        Uid = kwargs.get("uid")
+        ProxyId = kwargs.get("proxy_id")
+        Url= kwargs.get("url")
+        RequestHeaders= kwargs.get("request_headers")
+        RequestDate= kwargs.get("request_date")
+        RequestMethod=kwargs.get("request_method")
+        ResponseHeaders=kwargs.get("response_headers")
+        ResponseStatusCode=kwargs.get("response_status_code")
+        ResponseDateBytes=kwargs.get("response_date_bytes")
+        ResponseDateString=kwargs.get("response_date_string")
+        IssueTaskStatus= "0"#未扫描为0 已扫描为1
+        RedisId=kwargs.get("redis_id")
+
+        try:
+            self.cur.execute("INSERT INTO OriginalProxyData(uid,proxy_id,creation_time,url,request_headers,request_date,request_method,response_headers,response_status_code,response_date_bytes,response_date_string,issue_task_status,redis_id)\
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", (Uid, ProxyId, CreationTime, Url,RequestHeaders,RequestDate,RequestMethod,ResponseHeaders,ResponseStatusCode,ResponseDateBytes,ResponseDateString,IssueTaskStatus,RedisId,))
+            # 提交
+            self.con.commit()
+            self.con.close()
+            return True
+        except Exception as e:
+            ErrorLog().Write(e)
+            return None
+    def UpdateScanStatus(self, **kwargs) -> bool or None:#更新扫描状态
+        Uid = kwargs.get("uid")
+        RedisId = kwargs.get("redis_id")
+        try:
+            self.cur.execute("""UPDATE OriginalProxyData SET issue_task_status= ? WHERE uid = ? and redis_id = ? """,
+                             ( "1",Uid, RedisId,))
+            # 提交
+            if self.cur.rowcount < 1:  # 用来判断是否更新成功
+                self.con.commit()
+                self.con.close()
+                return False
+            else:
+                self.con.commit()
+                self.con.close()
+                return True
+        except Exception as e:
+            ErrorLog().Write(e)
+            return False
+
+    def Query(self, **kwargs) -> list or None:  # 查询某个代理项目抓取到的流量数据
+        Uid = kwargs.get("uid")
+        ProxyId = kwargs.get("proxy_id")
+        try:
+            self.cur.execute("select * from OriginalProxyData where uid =? and proxy_id =? order by original_proxy_id desc",
+                             (Uid, ProxyId,))
+            result_list = []
+            for i in self.cur.fetchall():
+                JsonValues = {}
+                JsonValues["original_proxy_id"] = i[0]
+                JsonValues["creation_time"] = i[3]
+                JsonValues["url"] = i[4]
+                JsonValues["request_method"] = i[7]
+                JsonValues["response_status_code"] = i[9]
+                JsonValues["issue_task_status"] = i[12]
+                result_list.append(JsonValues)
+            self.con.close()
+            return result_list
+        except Exception as e:
+            ErrorLog().Write(e)
+            return None
+
+    def QueryByStatus(self, **kwargs) -> list or None:  # 按扫描状态筛选流量，用于被动检测任务取数
+        Uid = kwargs.get("uid")
+        IssueTaskStatus = kwargs.get("issue_task_status")
+        try:
+            self.cur.execute("select * from OriginalProxyData where uid =? and issue_task_status =?",
+                             (Uid, IssueTaskStatus,))
+            result_list = []
+            for i in self.cur.fetchall():
+                JsonValues = {}
+                JsonValues["original_proxy_id"] = i[0]
+                JsonValues["proxy_id"] = i[2]
+                JsonValues["url"] = i[4]
+                JsonValues["request_headers"] = i[5]
+                JsonValues["request_date"] = i[6]
+                JsonValues["request_method"] = i[7]
+                JsonValues["response_headers"] = i[8]
+                JsonValues["response_status_code"] = i[9]
+                JsonValues["response_date_bytes"] = i[10]
+                JsonValues["response_date_string"] = i[11]
+                result_list.append(JsonValues)
+            self.con.close()
+            return result_list
+        except Exception as e:
+            ErrorLog().Write(e)
+            return None
 class HomeInfo:#查询首页信息表
     def __init__(self):
         self.con = sqlite3.connect(GetPath().DatabaseFile())
@@ -906,52 +971,51 @@ class HomeInfo:#查询首页信息表
         self.con.close()
         return self.info
 
-#
-# class ProxyTempUrl:#代理转储数据,为了防止重复下发任务做的
-#     def __init__(self):
-#         self.con = sqlite3.connect(GetPath().DatabaseFile())
-#         # 获取所创建数据的游标
-#         self.cur = self.con.cursor()
-#         # 创建表
-#         try:
-#             self.cur.execute("CREATE TABLE ProxyTempUrl\
-#                                 (proxy_temp_url_id INTEGER PRIMARY KEY,\
-#                                 uid TEXT NOT NULL,\
-#                                 proxy_temp_url TEXT NOT NULL,\
-#                                 creation_time TEXT NOT NULL,\
-#                                 proxy_id TEXT NOT NULL,\
-#                                 redis_id TEXT NOT NULL)")
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#
-#     def Write(self, **kwargs) -> bool or None:  # 写入相关信息
-#         CreationTime = str(int(time.time()))  # 创建时间
-#         Uid = kwargs.get("uid")
-#         ProxyTempUrl = kwargs.get("proxy_temp_url")
-#         RedisId= kwargs.get("redis_id")
-#         ProxyId = kwargs.get("proxy_id")
-#         try:
-#             self.cur.execute("INSERT INTO ProxyTempUrl(uid,proxy_temp_url,creation_time,proxy_id,redis_id)\
-#                 VALUES (?,?,?,?,?)", (Uid, ProxyTempUrl, CreationTime, ProxyId,RedisId,))
-#             # 提交
-#             self.con.commit()
-#             self.con.close()
-#             return True
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#             return False
-#
-#     def Query(self, **kwargs):  # 查询查看url的创建时间
-#         try:
-#             ProxyTempUrl = kwargs.get("proxy_temp_url")
-#             Uid = kwargs.get("uid")
-#             ProxyId=kwargs.get("proxy_id")
-#             self.cur.execute("select creation_time from ProxyTempUrl where uid =? and proxy_temp_url = ? and proxy_id= ?", (Uid, str(ProxyTempUrl),str(ProxyId),))
-#             #self.cur.execute("select * from ProxyTempUrl where uid =? ", (Uid,))
-#             return self.cur.fetchall()[-1][0]#返回最新的一条数据
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#             return None
+class ProxyTempUrl:#代理转储数据,为了防止重复下发任务做的
+    def __init__(self):
+        self.con = sqlite3.connect(GetPath().DatabaseFile())
+        # 获取所创建数据的游标
+        self.cur = self.con.cursor()
+        # 创建表
+        try:
+            self.cur.execute("CREATE TABLE ProxyTempUrl\
+                                (proxy_temp_url_id INTEGER PRIMARY KEY,\
+                                uid TEXT NOT NULL,\
+                                proxy_temp_url TEXT NOT NULL,\
+                                creation_time TEXT NOT NULL,\
+                                proxy_id TEXT NOT NULL,\
+                                redis_id TEXT NOT NULL)")
+        except Exception as e:
+            ErrorLog().Write(e)
+
+    def Write(self, **kwargs) -> bool or None:  # 写入相关信息
+        CreationTime = str(int(time.time()))  # 创建时间
+        Uid = kwargs.get("uid")
+        ProxyTempUrl = kwargs.get("proxy_temp_url")
+        RedisId= kwargs.get("redis_id")
+        ProxyId = kwargs.get("proxy_id")
+        try:
+            self.cur.execute("INSERT INTO ProxyTempUrl(uid,proxy_temp_url,creation_time,proxy_id,redis_id)\
+                VALUES (?,?,?,?,?)", (Uid, ProxyTempUrl, CreationTime, ProxyId,RedisId,))
+            # 提交
+            self.con.commit()
+            self.con.close()
+            return True
+        except Exception as e:
+            ErrorLog().Write(e)
+            return False
+
+    def Query(self, **kwargs):  # 查询查看url的创建时间
+        try:
+            ProxyTempUrl = kwargs.get("proxy_temp_url")
+            Uid = kwargs.get("uid")
+            ProxyId=kwargs.get("proxy_id")
+            self.cur.execute("select creation_time from ProxyTempUrl where uid =? and proxy_temp_url = ? and proxy_id= ?", (Uid, str(ProxyTempUrl),str(ProxyId),))
+            #self.cur.execute("select * from ProxyTempUrl where uid =? ", (Uid,))
+            return self.cur.fetchall()[-1][0]#返回最新的一条数据
+        except Exception as e:
+            ErrorLog().Write(e)
+            return None
 
 class CrossSiteScriptInfo:#XSS钓鱼接收数据库
     def __init__(self):

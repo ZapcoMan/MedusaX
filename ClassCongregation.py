@@ -209,157 +209,183 @@ class Proxies:  # 代理处理函数
 #
 #
 #
-# class PortDB:  # 端口数据表
-#     def __init__(self,**kwargs):
-#         self.uid = kwargs.get("uid") # 用户UID
-#         self.active_scan_id = kwargs.get("active_scan_id")  # 扫描active_scan_id
-#         self.port = kwargs.get("port")  # 开放端口
-#         self.ip = kwargs.get("ip")  # 目标IP
-#         self.domain = kwargs.get("domain") # 目标域名
-#         self.creation_time=kwargs.get("creation_time") # 创建时间
-#         # 如果数据库不存在的话，将会自动创建一个 数据库
-#         self.con = sqlite3.connect(GetPath().DatabaseFile())
-#         # 获取所创建数据的游标
-#         self.cur = self.con.cursor()
-#         # 创建表
-#         try:
-#             self.cur.execute("CREATE TABLE PortInfo\
-#                             (port_info_id INTEGER PRIMARY KEY,\
-#                             uid TEXT NOT NULL,\
-#                             active_scan_id TEXT NOT NULL,\
-#                             port TEXT NOT NULL,\
-#                             ip TEXT NOT NULL,\
-#                             domain TEXT NOT NULL,\
-#                             creation_time TEXT NOT NULL)")
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#
-#     def Write(self):
-#         try:
-#             self.cur.execute(
-#                 """INSERT INTO PortInfo (uid,active_scan_id,port,ip,domain,creation_time) VALUES (?,?,?,?,?,?)""",
-#                 (self.uid, self.active_scan_id,self.port, self.ip, self.domain, self.creation_time,))
-#             # 提交
-#             self.con.commit()
-#             self.con.close()
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#
-#     def Query(self, **kwargs):
-#             Uid = kwargs.get("uid")
-#             ActiveScanId = kwargs.get("active_scan_id")
-#             try:
-#                 self.cur.execute("select * from PortInfo where active_scan_id =? and uid=?", (ActiveScanId, Uid,))
-#                 result_list = []  # 存放json的返回结果列表用
-#                 for i in self.cur.fetchall():
-#                     JsonValues = {}
-#                     # JsonValues["active_scan_id"] = i[2]
-#                     JsonValues["port"] = i[3]
-#                     JsonValues["ip"] = i[4]
-#                     JsonValues["domain"] = i[5]
-#                     JsonValues["creation_time"] = i[6]
-#                     result_list.append(JsonValues)
-#                 self.con.close()
-#                 return result_list
-#             except Exception as e:
-#                 ErrorLog().Write(e)
-#                 return None
+class PortDB:  # 端口数据表
+    def __init__(self,**kwargs):
+        self.uid = kwargs.get("uid") # 用户UID
+        self.active_scan_id = kwargs.get("active_scan_id")  # 扫描active_scan_id
+        self.port = kwargs.get("port")  # 开放端口
+        self.ip = kwargs.get("ip")  # 目标IP
+        self.domain = kwargs.get("domain") # 目标域名
+        self.creation_time=kwargs.get("creation_time") # 创建时间
+        self.service = kwargs.get("service") or ""  # 服务名称，例如 http
+        self.product = kwargs.get("product") or ""  # 产品名，例如 nginx
+        self.version = kwargs.get("version") or ""  # 版本信息
+        self.state = kwargs.get("state") or "open"  # 端口状态
+        # 如果数据库不存在的话，将会自动创建一个 数据库
+        self.con = sqlite3.connect(GetPath().DatabaseFile())
+        # 获取所创建数据的游标
+        self.cur = self.con.cursor()
+        # 创建表
+        try:
+            self.cur.execute("CREATE TABLE PortInfo\
+                            (port_info_id INTEGER PRIMARY KEY,\
+                            uid TEXT NOT NULL,\
+                            active_scan_id TEXT NOT NULL,\
+                            port TEXT NOT NULL,\
+                            ip TEXT NOT NULL,\
+                            domain TEXT NOT NULL,\
+                            creation_time TEXT NOT NULL,\
+                            service TEXT,\
+                            product TEXT,\
+                            version TEXT,\
+                            state TEXT)")
+        except Exception as e:
+            ErrorLog().Write(e)
+            self.AddColumnIfMissing()  # 表已存在时补齐服务识别相关字段
+
+    def AddColumnIfMissing(self):  # 兼容早期表结构，缺失字段按需补齐
+        columns = {"service": "TEXT", "product": "TEXT", "version": "TEXT", "state": "TEXT"}
+        try:
+            self.cur.execute("PRAGMA table_info(PortInfo)")
+            existing = set(i[1] for i in self.cur.fetchall())
+            for name, column_type in columns.items():
+                if name not in existing:
+                    self.cur.execute("ALTER TABLE PortInfo ADD COLUMN %s %s" % (name, column_type))
+            self.con.commit()
+        except Exception as e:
+            ErrorLog().Write(e)
+
+    def Write(self):
+        try:
+            self.cur.execute(
+                """INSERT INTO PortInfo (uid,active_scan_id,port,ip,domain,creation_time,service,product,version,state) VALUES (?,?,?,?,?,?,?,?,?,?)""",
+                (self.uid, self.active_scan_id,self.port, self.ip, self.domain, self.creation_time,
+                 self.service, self.product, self.version, self.state,))
+            # 提交
+            self.con.commit()
+            self.con.close()
+        except Exception as e:
+            ErrorLog().Write(e)
+
+    def Query(self, **kwargs):
+            Uid = kwargs.get("uid")
+            ActiveScanId = kwargs.get("active_scan_id")
+            try:
+                self.cur.execute("select * from PortInfo where active_scan_id =? and uid=?", (ActiveScanId, Uid,))
+                result_list = []  # 存放json的返回结果列表用
+                for i in self.cur.fetchall():
+                    JsonValues = {}
+                    JsonValues["port"] = i[3]
+                    JsonValues["ip"] = i[4]
+                    JsonValues["domain"] = i[5]
+                    JsonValues["creation_time"] = i[6]
+                    # 后四个字段为服务识别新增，老数据缺失时按空值处理
+                    JsonValues["service"] = i[7] if len(i) > 7 else ""
+                    JsonValues["product"] = i[8] if len(i) > 8 else ""
+                    JsonValues["version"] = i[9] if len(i) > 9 else ""
+                    JsonValues["state"] = i[10] if len(i) > 10 else "open"
+                    result_list.append(JsonValues)
+                self.con.close()
+                return result_list
+            except Exception as e:
+                ErrorLog().Write(e)
+                return None
 
 
 #
 #
-# class VulnerabilityDetails:  # 所有数据库写入都是用同一个类
-#     def __init__(self, medusa,request, **kwargs):
-#         try:
-#             self.url = str(kwargs.get("Url"))  # 目标域名，如果是代理扫描会有完整的路径
-#             self.timestamp = str(int(time.time()))  # 获取时间戳
-#             self.name = medusa['name']  # 漏洞名称
-#             self.number = medusa['number']  # CVE编号
-#             self.author = medusa['author']  # 插件作者
-#             self.create_date = medusa['create_date']  # 插件创建时间
-#             self.algroup = medusa['algroup']  # 插件名称
-#             self.rank = medusa['rank']  # 漏洞等级
-#             self.disclosure = medusa['disclosure']  # 漏洞披露时间，如果不知道就写编写插件的时间
-#             self.details = base64.b64encode(medusa['details'].encode(encoding="utf-8")).decode('utf-8')  # 对结果进行编码写入数据库，鬼知道数据里面有什么玩意
-#             self.affects = medusa['affects']  # 漏洞组件
-#             self.desc_content = medusa['desc_content']  # 漏洞描述
-#             self.suggest = medusa['suggest']  # 修复建议
-#             self.version = medusa['version']  # 漏洞影响的版本
-#             self.uid = kwargs.get("Uid")  # 传入的用户ID
-#             self.active_scan_id = kwargs.get("ActiveScanId")  # 传入的父表SID
-#             try:
-#                 self.response_headers=base64.b64encode(str(request.headers).encode(encoding="utf-8")).decode(encoding="utf-8") # 响应头base64加密后数据
-#                 self.response_text=base64.b64encode(str(request.text).encode(encoding="utf-8")).decode(encoding="utf-8")  # 响应返回数据包
-#                 self.response_byte=base64.b64encode(request.content).decode(encoding="utf-8")#响应返回byte类型数据包
-#                 self.response_status_code=str(request.status_code) # 响应状态码
-#                 self.request_path_url=str(request.request.path_url)  # 请求路径
-#                 self.request_body=base64.b64encode(str(request.request.body).encode(encoding="utf-8")).decode(encoding="utf-8")  # 请求的POST请求数据
-#                 self.request_method=str(request.request.method)  # 请求方式
-#                 self.request_headers=base64.b64encode(str(request.request.headers).encode(encoding="utf-8")).decode(encoding="utf-8")  # 请求头
-#             except:
-#                 #如果报错就爆数据全部置空
-#                 self.response_headers = ""
-#                 self.response_text = ""
-#                 self.response_byte = ""
-#                 self.response_status_code = ""
-#                 self.request_path_url = ""
-#                 self.request_body = ""
-#                 self.request_method = ""
-#                 self.request_headers = ""
-#
-#             # 如果数据库不存在的话，将会自动创建一个 数据库
-#             self.con = sqlite3.connect(GetPath().DatabaseFile())
-#             # 获取所创建数据的游标
-#             self.cur = self.con.cursor()
-#             # 创建表
-#             try:
-#                 # 如果设置了主键那么就导致主健值不能相同，如果相同就写入报错
-#                 self.cur.execute("CREATE TABLE Medusa\
-#                             (scan_info_id INTEGER PRIMARY KEY,\
-#                             url TEXT NOT NULL,\
-#                             name TEXT NOT NULL,\
-#                             affects TEXT NOT NULL,\
-#                             rank TEXT NOT NULL,\
-#                             suggest TEXT NOT NULL,\
-#                             desc_content TEXT NOT NULL,\
-#                             details TEXT NOT NULL,\
-#                             number TEXT NOT NULL,\
-#                             author TEXT NOT NULL,\
-#                             create_date TEXT NOT NULL,\
-#                             disclosure TEXT NOT NULL,\
-#                             algroup TEXT NOT NULL,\
-#                             version TEXT NOT NULL,\
-#                             timestamp TEXT NOT NULL,\
-#                             active_scan_id TEXT NOT NULL,\
-#                             uid TEXT NOT NULL,\
-#                             response_headers TEXT NOT NULL,\
-#                             response_text TEXT NOT NULL,\
-#                             response_byte TEXT NOT NULL,\
-#                             response_status_code TEXT NOT NULL,\
-#                             request_path_url TEXT NOT NULL,\
-#                             request_body TEXT NOT NULL,\
-#                             request_method TEXT NOT NULL,\
-#                             request_headers TEXT NOT NULL)")
-#             except Exception as e:
-#                 ErrorLog().Write(e)
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#
-#     def Write(self):  # 统一写入
-#         try:
-#             self.cur.execute("""INSERT INTO Medusa (url,name,affects,rank,suggest,desc_content,details,number,author,create_date,disclosure,algroup,version,timestamp,active_scan_id,uid,response_headers,response_text,response_byte,response_status_code,request_path_url,request_body,request_method,request_headers) \
-#             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (
-#                 self.url, self.name, self.affects, self.rank, self.suggest, self.desc_content, self.details,
-#                 self.number,
-#                 self.author, self.create_date, self.disclosure, self.algroup, self.version, self.timestamp,
-#                 self.active_scan_id,self.uid,self.response_headers,self.response_text,self.response_byte,self.response_status_code,self.request_path_url,self.request_body,self.request_method,self.request_headers,))
-#             # 提交
-#             GetSsid = self.cur.lastrowid
-#             self.con.commit()
-#             self.con.close()
-#             ScanInformation().Write(scan_info_id=GetSsid,url=self.url,active_scan_id=self.active_scan_id,rank=self.rank,uid=self.uid,name=self.name)#调用web版数据表，写入ScanInformation关系表
-#         except Exception as e:
-#             ErrorLog().Write(e)
+class VulnerabilityDetails:  # 所有数据库写入都是用同一个类
+    def __init__(self, medusa,request, **kwargs):
+        try:
+            self.url = str(kwargs.get("Url"))  # 目标域名，如果是代理扫描会有完整的路径
+            self.timestamp = str(int(time.time()))  # 获取时间戳
+            self.name = medusa['name']  # 漏洞名称
+            self.number = medusa['number']  # CVE编号
+            self.author = medusa['author']  # 插件作者
+            self.create_date = medusa['create_date']  # 插件创建时间
+            self.algroup = medusa['algroup']  # 插件名称
+            self.rank = medusa['rank']  # 漏洞等级
+            self.disclosure = medusa['disclosure']  # 漏洞披露时间，如果不知道就写编写插件的时间
+            self.details = base64.b64encode(medusa['details'].encode(encoding="utf-8")).decode('utf-8')  # 对结果进行编码写入数据库，鬼知道数据里面有什么玩意
+            self.affects = medusa['affects']  # 漏洞组件
+            self.desc_content = medusa['desc_content']  # 漏洞描述
+            self.suggest = medusa['suggest']  # 修复建议
+            self.version = medusa['version']  # 漏洞影响的版本
+            self.uid = kwargs.get("Uid")  # 传入的用户ID
+            self.active_scan_id = kwargs.get("ActiveScanId")  # 传入的父表SID
+            try:
+                self.response_headers=base64.b64encode(str(request.headers).encode(encoding="utf-8")).decode(encoding="utf-8") # 响应头base64加密后数据
+                self.response_text=base64.b64encode(str(request.text).encode(encoding="utf-8")).decode(encoding="utf-8")  # 响应返回数据包
+                self.response_byte=base64.b64encode(request.content).decode(encoding="utf-8")#响应返回byte类型数据包
+                self.response_status_code=str(request.status_code) # 响应状态码
+                self.request_path_url=str(request.request.path_url)  # 请求路径
+                self.request_body=base64.b64encode(str(request.request.body).encode(encoding="utf-8")).decode(encoding="utf-8")  # 请求的POST请求数据
+                self.request_method=str(request.request.method)  # 请求方式
+                self.request_headers=base64.b64encode(str(request.request.headers).encode(encoding="utf-8")).decode(encoding="utf-8")  # 请求头
+            except:
+                #如果报错就爆数据全部置空
+                self.response_headers = ""
+                self.response_text = ""
+                self.response_byte = ""
+                self.response_status_code = ""
+                self.request_path_url = ""
+                self.request_body = ""
+                self.request_method = ""
+                self.request_headers = ""
+
+            # 如果数据库不存在的话，将会自动创建一个 数据库
+            self.con = sqlite3.connect(GetPath().DatabaseFile())
+            # 获取所创建数据的游标
+            self.cur = self.con.cursor()
+            # 创建表
+            try:
+                # 如果设置了主键那么就导致主健值不能相同，如果相同就写入报错
+                self.cur.execute("CREATE TABLE Medusa\
+                            (scan_info_id INTEGER PRIMARY KEY,\
+                            url TEXT NOT NULL,\
+                            name TEXT NOT NULL,\
+                            affects TEXT NOT NULL,\
+                            rank TEXT NOT NULL,\
+                            suggest TEXT NOT NULL,\
+                            desc_content TEXT NOT NULL,\
+                            details TEXT NOT NULL,\
+                            number TEXT NOT NULL,\
+                            author TEXT NOT NULL,\
+                            create_date TEXT NOT NULL,\
+                            disclosure TEXT NOT NULL,\
+                            algroup TEXT NOT NULL,\
+                            version TEXT NOT NULL,\
+                            timestamp TEXT NOT NULL,\
+                            active_scan_id TEXT NOT NULL,\
+                            uid TEXT NOT NULL,\
+                            response_headers TEXT NOT NULL,\
+                            response_text TEXT NOT NULL,\
+                            response_byte TEXT NOT NULL,\
+                            response_status_code TEXT NOT NULL,\
+                            request_path_url TEXT NOT NULL,\
+                            request_body TEXT NOT NULL,\
+                            request_method TEXT NOT NULL,\
+                            request_headers TEXT NOT NULL)")
+            except Exception as e:
+                ErrorLog().Write(e)
+        except Exception as e:
+            ErrorLog().Write(e)
+
+    def Write(self):  # 统一写入
+        try:
+            self.cur.execute("""INSERT INTO Medusa (url,name,affects,rank,suggest,desc_content,details,number,author,create_date,disclosure,algroup,version,timestamp,active_scan_id,uid,response_headers,response_text,response_byte,response_status_code,request_path_url,request_body,request_method,request_headers) \
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (
+                self.url, self.name, self.affects, self.rank, self.suggest, self.desc_content, self.details,
+                self.number,
+                self.author, self.create_date, self.disclosure, self.algroup, self.version, self.timestamp,
+                self.active_scan_id,self.uid,self.response_headers,self.response_text,self.response_byte,self.response_status_code,self.request_path_url,self.request_body,self.request_method,self.request_headers,))
+            # 提交
+            GetSsid = self.cur.lastrowid
+            self.con.commit()
+            self.con.close()
+            ScanInformation().Write(scan_info_id=GetSsid,url=self.url,active_scan_id=self.active_scan_id,rank=self.rank,uid=self.uid,name=self.name)#调用web版数据表，写入ScanInformation关系表
+        except Exception as e:
+            ErrorLog().Write(e)
 
 class ErrorLog:  # 报错写入日志
     def CallInformation(self):#获取调用堆栈信息
@@ -638,99 +664,117 @@ class UrlProcessing:  # URL处理函数
 #         return text
 
 #这个是web的类先这这边，有点小BUG
-# class ScanInformation:#ActiveScanList的子表，单个URL相关漏洞表,写入父表中的SID和UID,以及子表中的SSID，使他们相关连，这个就是一个关系表，关联MEDUSA表和ActiveScanList表
-#     def __init__(self):
-#         self.con = sqlite3.connect(GetPath().DatabaseFile())
-#         # 获取所创建数据的游标
-#         self.cur = self.con.cursor()
-#         # 创建表
-#         try:
-#             self.cur.execute("CREATE TABLE ScanInformation\
-#                             (id INTEGER PRIMARY KEY,\
-#                             active_scan_id TEXT NOT NULL,\
-#                             url TEXT NOT NULL,\
-#                             rank TEXT NOT NULL,\
-#                             scan_info_id TEXT NOT NULL,\
-#                             uid TEXT NOT NULL,\
-#                             name TEXT NOT NULL,\
-#                             creation_time TEXT NOT NULL)")
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#     def Write(self,**kwargs)->bool:#写入相关信息
-#         CreationTime = str(int(time.time())) # 创建时间
-#         Url=kwargs.get("url")
-#         ScanInfoId=kwargs.get("scan_info_id")
-#         Uid = kwargs.get("uid")
-#         ActiveScanId = kwargs.get("active_scan_id")
-#         Rank = kwargs.get("rank")
-#         Name= kwargs.get("name")
-#         try:
-#             self.cur.execute("INSERT INTO ScanInformation(active_scan_id,url,rank,scan_info_id,uid,name,creation_time)\
-#             VALUES (?,?,?,?,?,?,?)",(ActiveScanId,Url,Rank,ScanInfoId,Uid,Name,CreationTime,))
-#             # 提交
-#             self.con.commit()
-#             self.con.close()
-#             return True#获取主键的ID值，也就是sid的值
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#             return False
-#     def Query(self,**kwargs)->str or None:#查询相关表内容
-#
-#         Uid=kwargs.get("uid")
-#         ActiveScanId = kwargs.get("active_scan_id")
-#         try:
-#             self.cur.execute("select * from ScanInformation where uid =? and active_scan_id = ?", (Uid,ActiveScanId,))
-#             result_list = []  # 存放json的返回结果列表用
-#             for i in self.cur.fetchall():
-#                 JsonValues = {}
-#                 JsonValues["url"] = i[2]
-#                 JsonValues["scan_info_id"] = i[4]
-#                 JsonValues["rank"] = i[3]
-#                 JsonValues["name"] = i[6]
-#                 result_list.append(JsonValues)
-#             self.con.close()
-#             return result_list
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#             return None
-#
-#
-# class SubdomainTable:  # 这是一个子域名表
-#     def __init__(self,Subdomain:str,url: str, **kwargs):
-#         try:
-#             self.url = str(url)  # 目标域名
-#             self.timestamp = str(int(time.time()))  # 获取时间戳
-#             self.subdomain=Subdomain#获取的子域名
-#             self.uid = kwargs.get("Uid")  # 传入的用户ID
-#             self.active_scan_id=kwargs.get("ActiveScanId")# 传入的父表SID
-#             # 如果数据库不存在的话，将会自动创建一个 数据库
-#             self.con = sqlite3.connect(GetPath().DatabaseFile())
-#             # 获取所创建数据的游标
-#             self.cur = self.con.cursor()
-#             # 创建表
-#             try:
-#                 # 如果设置了主键那么就导致主健值不能相同，如果相同就写入报错
-#                 self.cur.execute("CREATE TABLE Subdomain\
-#                             (id INTEGER PRIMARY KEY,\
-#                             url TEXT NOT NULL,\
-#                             subdomain TEXT NOT NULL,\
-#                             timestamp TEXT NOT NULL,\
-#                             active_scan_id TEXT NOT NULL,\
-#                             uid TEXT NOT NULL)")
-#             except Exception as e:
-#                 ErrorLog().Write(e)
-#         except Exception as e:
-#             ErrorLog().Write(e)
-#
-#     def Write(self):  # 统一写入
-#         try:
-#             self.cur.execute("""INSERT INTO Subdomain (url,subdomain,timestamp,active_scan_id,uid) \
-#             VALUES (?,?,?,?,?)""", (self.url, self.subdomain,self.timestamp,self.active_scan_id,self.uid,))
-#             # 提交
-#             self.con.commit()
-#             self.con.close()
-#         except Exception as e:
-#             ErrorLog().Write(e)
+class ScanInformation:#ActiveScanList的子表，单个URL相关漏洞表,写入父表中的SID和UID,以及子表中的SSID，使他们相关连，这个就是一个关系表，关联MEDUSA表和ActiveScanList表
+    def __init__(self):
+        self.con = sqlite3.connect(GetPath().DatabaseFile())
+        # 获取所创建数据的游标
+        self.cur = self.con.cursor()
+        # 创建表
+        try:
+            self.cur.execute("CREATE TABLE ScanInformation\
+                            (id INTEGER PRIMARY KEY,\
+                            active_scan_id TEXT NOT NULL,\
+                            url TEXT NOT NULL,\
+                            rank TEXT NOT NULL,\
+                            scan_info_id TEXT NOT NULL,\
+                            uid TEXT NOT NULL,\
+                            name TEXT NOT NULL,\
+                            creation_time TEXT NOT NULL)")
+        except Exception as e:
+            ErrorLog().Write(e)
+    def Write(self,**kwargs)->bool:#写入相关信息
+        CreationTime = str(int(time.time())) # 创建时间
+        Url=kwargs.get("url")
+        ScanInfoId=kwargs.get("scan_info_id")
+        Uid = kwargs.get("uid")
+        ActiveScanId = kwargs.get("active_scan_id")
+        Rank = kwargs.get("rank")
+        Name= kwargs.get("name")
+        try:
+            self.cur.execute("INSERT INTO ScanInformation(active_scan_id,url,rank,scan_info_id,uid,name,creation_time)\
+            VALUES (?,?,?,?,?,?,?)",(ActiveScanId,Url,Rank,ScanInfoId,Uid,Name,CreationTime,))
+            # 提交
+            self.con.commit()
+            self.con.close()
+            return True#获取主键的ID值，也就是sid的值
+        except Exception as e:
+            ErrorLog().Write(e)
+            return False
+    def Query(self,**kwargs)->str or None:#查询相关表内容
+
+        Uid=kwargs.get("uid")
+        ActiveScanId = kwargs.get("active_scan_id")
+        try:
+            self.cur.execute("select * from ScanInformation where uid =? and active_scan_id = ?", (Uid,ActiveScanId,))
+            result_list = []  # 存放json的返回结果列表用
+            for i in self.cur.fetchall():
+                JsonValues = {}
+                JsonValues["url"] = i[2]
+                JsonValues["scan_info_id"] = i[4]
+                JsonValues["rank"] = i[3]
+                JsonValues["name"] = i[6]
+                result_list.append(JsonValues)
+            self.con.close()
+            return result_list
+        except Exception as e:
+            ErrorLog().Write(e)
+            return None
+
+
+class SubdomainTable:  # 这是一个子域名表
+    def __init__(self,Subdomain:str,url: str, **kwargs):
+        try:
+            self.url = str(url)  # 目标域名
+            self.timestamp = str(int(time.time()))  # 获取时间戳
+            self.subdomain=Subdomain#获取的子域名
+            self.uid = kwargs.get("Uid")  # 传入的用户ID
+            self.active_scan_id=kwargs.get("ActiveScanId")# 传入的父表SID
+            # 如果数据库不存在的话，将会自动创建一个 数据库
+            self.con = sqlite3.connect(GetPath().DatabaseFile())
+            # 获取所创建数据的游标
+            self.cur = self.con.cursor()
+            # 创建表
+            try:
+                # 如果设置了主键那么就导致主健值不能相同，如果相同就写入报错
+                self.cur.execute("CREATE TABLE Subdomain\
+                            (id INTEGER PRIMARY KEY,\
+                            url TEXT NOT NULL,\
+                            subdomain TEXT NOT NULL,\
+                            timestamp TEXT NOT NULL,\
+                            active_scan_id TEXT NOT NULL,\
+                            uid TEXT NOT NULL)")
+            except Exception as e:
+                ErrorLog().Write(e)
+        except Exception as e:
+            ErrorLog().Write(e)
+
+    def Write(self):  # 统一写入
+        try:
+            self.cur.execute("""INSERT INTO Subdomain (url,subdomain,timestamp,active_scan_id,uid) \
+            VALUES (?,?,?,?,?)""", (self.url, self.subdomain,self.timestamp,self.active_scan_id,self.uid,))
+            # 提交
+            self.con.commit()
+            self.con.close()
+        except Exception as e:
+            ErrorLog().Write(e)
+
+    def Query(self, **kwargs):  # 查询某个任务下已发现的子域名
+        Uid = kwargs.get("uid")
+        ActiveScanId = kwargs.get("active_scan_id")
+        try:
+            self.cur.execute("select * from Subdomain where uid =? and active_scan_id = ?", (Uid, ActiveScanId,))
+            result_list = []
+            for i in self.cur.fetchall():
+                JsonValues = {}
+                JsonValues["url"] = i[1]
+                JsonValues["subdomain"] = i[2]
+                JsonValues["timestamp"] = i[3]
+                result_list.append(JsonValues)
+            self.con.close()
+            return result_list
+        except Exception as e:
+            ErrorLog().Write(e)
+            return None
 
 class Md5Encryption:#加密类
     def __init__(self):

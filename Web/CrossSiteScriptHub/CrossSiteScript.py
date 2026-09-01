@@ -8,6 +8,7 @@ import base64
 import re
 from config import cross_site_script_uses_domain_names
 from Web.Workbench.LogRelated import UserOperationLogRecord,RequestLogRecord
+from django.views.decorators.csrf import csrf_exempt
 
 def GetIp(request):
     '''获取请求者的IP信息'''
@@ -18,6 +19,7 @@ def GetIp(request):
         ip = request.META.get('REMOTE_ADDR')  # 未使用代理获取IP
     return ip
 
+@csrf_exempt  # 该接口由被钓鱼的目标浏览器触发，无法携带CSRF令牌
 def Monitor(request,data):#用于接收信息的监控
     RequestLogRecord(request, request_api="xss")
     get_request_fragment=""

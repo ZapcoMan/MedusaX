@@ -25,7 +25,8 @@ app.autodiscover_tasks({"Web.ApplicationCollection.CollectionWork.AppleCollectio
                         "Web.SystemInfo.HardwareInfo.Monitor",
                         "Web.TrojanOrVirus.TrojanInterface.CompileCode",
                         "Web.TrojanOrVirus.TrojanInterface.CompilePortableExecutableFile",
-                        "Web.Email.Graph.Manufacture"})# 自动搜索并加载任务，任务列表防止找不到任务而报错
+                        "Web.Email.Graph.Manufacture",
+                        "Web.ActiveScan.ScanTasks"})# 自动搜索并加载任务，任务列表防止找不到任务而报错
 app.conf.beat_schedule = {
         'HardwareInfoMonitor': {
             'task': 'Web.SystemInfo.HardwareInfo.Monitor',
