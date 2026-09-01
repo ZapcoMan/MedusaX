@@ -1,9 +1,9 @@
 <img src="https://github.com/Ascotbe/Medusa/blob/master/Medusa.png?raw=true" width="1500" alt="MedusaX" />
 
 <p align="center">
-    <a href="https://github.com/Ascotbe/Medusa"><img alt="Release" src="https://img.shields.io/badge/MedusaX-0.1.0-green"></a>
+    <a href="https://github.com/Ascotbe/Medusa"><img alt="Release" src="https://img.shields.io/badge/MedusaX-0.2.0-green"></a>
     <a href="https://github.com/Ascotbe/Medusa"><img alt="Release" src="https://img.shields.io/badge/python-3.7+-blueviolet"></a>
-    <a href="https://github.com/Ascotbe/Medusa"><img alt="Release" src="https://img.shields.io/badge/Version-0.1.0-red"></a>
+    <a href="https://github.com/Ascotbe/Medusa"><img alt="Release" src="https://img.shields.io/badge/Version-0.2.0-red"></a>
     <a href="https://github.com/Ascotbe/Medusa"><img alt="Release" src="https://img.shields.io/badge/LICENSE-GPL-ff69b4"></a>
     <a href="https://github.com/Ascotbe/Medusa"><img alt="Release" src="https://img.shields.io/badge/Based_on-Ascotbe%2FMedusa-orange"></a>
 </p>
@@ -16,13 +16,18 @@
 >
 > 本项目使用 `GPL` 协议，未经授权，禁止使用商业用途。
 >
-> 当前版本：`v0.1.0`（二次开发起始版本，功能与上游 Medusa 保持一致，后续将在此基础上持续迭代）。
+> 当前版本：`v0.2.0`（完成扫描体系重建与安全加固：插件化主动扫描、端口扫描、子域名探测、被动扫描代理、Word 报告生成全部恢复可用，并关闭 DEBUG、启用 CSRF 防护、密钥环境变量化）。
 
 ### 二次开发说明
 
 - **上游项目**：[Ascotbe/Medusa](https://github.com/Ascotbe/Medusa)
 - **本项目定位**：在保留原版核心能力的基础上进行二次开发，版本号独立演进，从 `v0.1.0` 开始。
-- **当前状态**：二次开发尚未开始，代码与上游基本一致，详细改动将在后续版本的更新日志中同步。
+- **当前状态**：v0.2.0 已完成方向 A（扫描体系完整重建）与方向 B（安全加固）：
+  - 插件化主动扫描引擎（`Web/ActiveScan/`）：YAML 插件解析（nuclei 风格）+ CEL 表达式判定（`cel-python`），失败降级不中断任务
+  - 端口扫描（`python-nmap`，Docker 内已内置 nmap 二进制）、子域名探测（DNS 枚举 + 泛解析过滤）、被动扫描代理（`PassiveScanProxy.py` + mitmproxy addon）
+  - 扫描 API 层：任务下发、任务/漏洞/端口/子域名查询、报告生成与下载、被动扫描项目管理（`docs/API/主动扫描.md`、`docs/API/被动扫描.md`）
+  - 安全加固：`DEBUG` 环境变量化（默认关闭）、`STATIC_ROOT` + `collectstatic` + nginx 静态托管、CSRF 全链路防护（中间件 + 前端拦截器 + csrftoken 下发接口）、`SECRET_KEY` 与 Redis 密码环境变量化、CORS 白名单收紧
+  - 详细改动将随后续版本更新日志持续同步。
 
 ### 项目简介
 
@@ -34,7 +39,7 @@
 | --- | --- |
 | 后端 | Python 3.7+、Django 3.0.5、Celery 5.2.7（异步任务）、Gunicorn、Redis（消息队列/缓存） |
 | 前端 | Vue 2.6 + Vue Router + Vuex + Ant Design Vue + ECharts |
-| 内置服务 | HTTP 服务（`HTTPServer.py`，端口 9999）、DNS 服务（`DNSServer.py`，端口 8888，用于 DNSLog 回连验证） |
+| 内置服务 | HTTP 服务（`HTTPServer.py`，端口 9999）、DNS 服务（`DNSServer.py`，端口 8888，用于 DNSLog 回连验证）、被动扫描代理（`PassiveScanProxy.py`，基于 mitmproxy 的独立代理进程，用于被动流量抓取与检测） |
 | 数据库 | SQLite（`Medusa.db`）+ Redis |
 | 部署 | Docker（`Dockerfile`、`install.sh`）、Nginx 反向代理、Sendmail 自建邮件服务 |
 
